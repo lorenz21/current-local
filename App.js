@@ -1,25 +1,20 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Constants, Location, Permissions, MapView } from 'expo';
 
 export default class App extends React.Component {
   state = {
-    mapRegion: { latitude: 37.78825, longitude: -122.4324, latitudeDelta: 0.0922, longitudeDelta: 0.0421 },
+    mapRegion: { latitude: 37.78825, longitude: -122.4324, latitudeDelta: 0.0922, 
+      longitudeDelta: 0.0421 },
     location: {coords: { latitude: 37.78825, longitude: -122.4324}},
+    marker : { latitude: 0, longitude: 0 },
     locationResult: null,
     errorMessage: null,
   };
 
-  componentWillMount() {
-    if (Platform.OS === 'android' && !Constants.isDevice) {
-      this.setState({
-        errorMessage: 'This will not work on Sketch in an Android emulator. Try it on your device',
-      });
-    }
-    else {
-      this._getLocationAsync();
-    }
-  }
+  handleCurrentLocation = () => {
+    this._getLocationAsync();
+  };
 
   _handleMapRegionChange = mapRegion => {
     this.setState({ mapRegion });
@@ -32,22 +27,39 @@ export default class App extends React.Component {
         errorMessage:'Permission to access location was denied',
       });
     }
-
     let location = await Location.getCurrentPositionAsync({});
-    this.setState({ locationResult: JSON.stringify(location), location, });
+    console.log(location.coords);
+    this.setState({ marker: location.coords, 
+      locationResult: JSON.stringify(location), location, 
+    });
   }
 
   render() {
     return (
       <View style={styles.container}>
         <MapView 
-        style={{ alignSelf: 'stretch', height: 500 }}
-        region={{ latitude: this.state.location.coords.latitude, longitude: this.state.location.coords.longitude, latitudeDelta: 0.0922, 
-        longitudeDelta: 0.0421}}
-        onRegionChange={this._handleMapRegionChange}
+        style={StyleSheet.absoluteFillObject}
+        region={{ latitude: this.state.location.coords.latitude, longitude: this.state.location.coords.longitude, latitudeDelta: 0.0322, 
+          longitudeDelta: 0.0321}}
+        onRegionChange={(mapRegion) => this._handleMapRegionChange}
         >
+        {this.state.marker ?  
+        <MapView.Marker 
+          coordinate={this.state.marker}
+          title="Current Location"
+          description="You are here..."
+        />
+        :
+        ''}
 
         </MapView>
+        <TouchableOpacity
+          style={styles.button}
+          accessible={true}
+          accessibilityLabel="Current Location Button"
+          onPress={this.handleCurrentLocation}>
+          <Text style={{color: '#E6E8E6'}}>Locate Me</Text>
+          </TouchableOpacity>
       </View>
     );
   }
@@ -64,5 +76,14 @@ const styles = StyleSheet.create({
     margin: 24, 
     fontSize: 18, 
     textAlign: 'center',
+  },
+  button: {
+    alignItems: 'center',
+    backgroundColor: '#3772FF',
+    padding: 10,
+    marginBottom: 20,
+    position: 'absolute',
+    bottom: 0,
+    borderRadius: 5,
   },
 });
