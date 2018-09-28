@@ -4,11 +4,9 @@ import { Constants, Location, Permissions, MapView } from 'expo';
 
 export default class App extends React.Component {
   state = {
-    mapRegion: { latitude: 37.78825, longitude: -122.4324, latitudeDelta: 0.0922, 
-      longitudeDelta: 0.0421 },
+    mapRegion: null,
     location: {coords: { latitude: 37.78825, longitude: -122.4324}},
     marker : { latitude: 0, longitude: 0 },
-    locationResult: null,
     errorMessage: null,
   };
 
@@ -29,8 +27,9 @@ export default class App extends React.Component {
     }
     let location = await Location.getCurrentPositionAsync({});
     console.log(location.coords);
-    this.setState({ marker: location.coords, 
-      locationResult: JSON.stringify(location), location, 
+    this.setState({ 
+      marker: location.coords, 
+      location: location 
     });
   }
 
@@ -50,7 +49,7 @@ export default class App extends React.Component {
           description="You are here..."
         />
         :
-        ''}
+        null}
 
         </MapView>
         <TouchableOpacity
